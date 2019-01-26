@@ -17,6 +17,15 @@ class GameScene extends Phaser.Scene {
     this.load.image('chair', 'assets/chair.png')
     this.load.image('art1', 'assets/art1.png')
 
+
+    this.load.image('walk1', 'assets/Walk_Cycle1.png')
+    this.load.image('walk2', 'assets/Walk_Cycle2.png')
+    this.load.image('walk3', 'assets/Walk_Cycle3.png')
+    this.load.image('walk4', 'assets/Walk_Cycle4.png')
+    this.load.image('walk5', 'assets/Walk_Cycle5.png')
+    this.load.image('walk6', 'assets/Walk_Cycle6.png')
+    this.load.image('walk7', 'assets/Walk_Cycle7.png')
+
     game.input.mouse.capture = true
   }
 
@@ -63,9 +72,44 @@ class GameScene extends Phaser.Scene {
     let guy = this.add.sprite(260,HEIGHT-20,'guy').setOrigin(0,1)
     guy.setScale(.2)
 
+
+    //guy
+    var line1 = new Phaser.Curves.Line([ 100, 100, 500, 200 ]);
+    follower = { t: 0, vec: new Phaser.Math.Vector2() };
+    path.add(line1);
+    this.tweens.add({
+      targets: follower,
+      t: 1,
+      ease: 'Linear',
+      duration: 4000,
+      yoyo: true,
+      repeat: -1
+  })
+
+    this.anims.create({
+      key: 'snooze',
+      frames: [
+          { key: 'walk1' },
+          { key: 'walk2' },
+          { key: 'walk3' },
+          { key: 'walk4' },
+          { key: 'walk5' },
+          { key: 'walk6' },
+          { key: 'walk7', duration: 50 }
+      ],
+      frameRate: 8,
+      repeat: -1
+  })
+
+  guy = this.add.sprite(260, 360, 'walk1').play('snooze')
+  guy.setScale(.26)
+
   }
 
   update (){
+    graphics.lineStyle(2, 0xffffff, 1);
+
+    path.draw(graphics);
     //console.log('X:' + this.input.activePointer.x);
     //console.log('Y:' + this.input.activePointer.y);
   }
@@ -166,6 +210,10 @@ var config = {
   height: HEIGHT,
   scene: TitleScene
 }
+
+var follower;
+var path;
+var graphics;
 
 var game = new Phaser.Game(config)
 var score = 0
