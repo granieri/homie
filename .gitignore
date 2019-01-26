@@ -1,2 +1,4 @@
 .DS_STORE
 .git
+node_modules
+package-lock.json
