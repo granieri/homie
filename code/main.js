@@ -1,7 +1,7 @@
 var config = {
   type: Phaser.AUTO,
   width: 800,
-  height: 600,
+  height: 480,
   physics: {
     default: 'arcade',
     arcade: {
@@ -20,11 +20,13 @@ var game = new Phaser.Game(config)
 var score = 0
 
 function preload () {
-  game.stage.backgroundColor="#4488AA"
+  this.load.image('star', 'assets/star.png')
+  game.input.mouse.capture = true
+  //game.input.activePointer.leftButton.isDown > click
 }
 
 function create (){
-
+  star = this.add.sprite(100, 450, 'star')
 }
 
 function update (){

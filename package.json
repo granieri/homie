@@ -1,0 +1,22 @@
+{
+  "name": "homie",
+  "version": "1.0.0",
+  "description": "a game",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/granieri/homie.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/granieri/homie/issues"
+  },
+  "homepage": "https://github.com/granieri/homie#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
