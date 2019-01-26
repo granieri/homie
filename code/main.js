@@ -4,6 +4,7 @@ let blip
 class GameScene extends Phaser.Scene {
   constructor(config) {
     super(config)
+    game.scene.remove('TutScene')
   }
 
   preload () {
@@ -16,7 +17,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('coffee', 'assets/coffee.png')
     this.load.image('chair', 'assets/chair.png')
     this.load.image('art1', 'assets/art1.png')
-
+    this.load.image('menu', 'assets/menu.png')
 
     this.load.image('walk1', 'assets/Walk_Cycle1.png')
     this.load.image('walk2', 'assets/Walk_Cycle2.png')
@@ -30,7 +31,7 @@ class GameScene extends Phaser.Scene {
   }
 
   create (){
-    music.pause()
+    //music.pause()
     let rect = 0
 
     let bg = this.add.sprite(WIDTH / 2, HEIGHT / 2, 'bg')
@@ -42,6 +43,34 @@ class GameScene extends Phaser.Scene {
     this.input.on('pointerout', function (event, gameObjects) {
       gameObjects[0].clearTint();
     })
+
+    this.input.on('pointerdown', function (e, gameObjects) {
+      if (this.menu_box) {
+        console.log(this.menu_box.getChildren())
+        this.menu_box.getChildren().forEach(child => {child.destroy()})
+        this.menu_box.getChildren().forEach(child => {child.destroy()})
+        this.menu_box.destroy()
+      }
+      var menu_box = this.add.group()
+
+      //make the back of the message box
+      var box = this.add.sprite(e.x, e.y, 'menu').setOrigin(0,1)
+      box.alpha = 0.9
+      //make a text field
+      var text1 = this.add.text(e.x+50, e.y-20, 'this is some text', { fontFamily: 'pxl', fontSize: 10 }).setOrigin(0,1)
+
+      box.width = 200
+      box.height = 100
+      menu_box.add(box)
+      menu_box.add(text1)
+
+      menu_box.x = this.input.activePointer.x
+      menu_box.y = this.input.activePointer.y
+
+      //make a state reference to the messsage box
+      this.menu_box = menu_box
+    }, this)
+
     //bg
     let art1 = this.add.sprite(236,212,'art1').setOrigin(0,1).setInteractive()
     art1.setScale(.08)
@@ -86,7 +115,7 @@ class GameScene extends Phaser.Scene {
       duration: 4000,
       yoyo: true,
       repeat: -1
-  })
+    })
 
     this.anims.create({
       key: 'snooze',
@@ -101,11 +130,10 @@ class GameScene extends Phaser.Scene {
       ],
       frameRate: 8,
       repeat: -1
-  })
+    })
 
-  guy = this.add.sprite(260, 360, 'walk1').play('snooze')
-  guy.setScale(.26)
-
+    guy = this.add.sprite(260, 360, 'walk1').play('snooze')
+    guy.setScale(.26)
   }
 
   update (){
@@ -115,7 +143,6 @@ class GameScene extends Phaser.Scene {
     //console.log('X:' + this.input.activePointer.x);
     //console.log('Y:' + this.input.activePointer.y);
   }
-
 }
 
 class TitleScene extends Phaser.Scene {
@@ -135,6 +162,8 @@ class TitleScene extends Phaser.Scene {
     this.load.audio('blip', [
         'assets/blip.mp3'
     ])
+
+    this.load.image('homie', 'assets/homie.png')
   }
 
   create (){
@@ -150,13 +179,17 @@ class TitleScene extends Phaser.Scene {
       }
     })
 
-    music = this.sound.add('theme')
+    let homie = this.add.sprite(610,195,'homie')
+    homie.angle = 1
+
+    music = this.sound.add('theme', {loop: true})
     music.play()
 
     blip = this.sound.add('blip')
 
     this.input.on('pointerdown', function (pointer) {
       blip.play()
+      game.scene.stop('TitleScene')
       game.scene.start('TutScene')
     })
   }
@@ -168,9 +201,11 @@ class TitleScene extends Phaser.Scene {
 class TutScene extends Phaser.Scene {
   constructor(config) {
     super(config)
+    game.scene.remove('TitleScene')
   }
 
   preload () {
+    this.scene.remove('TitleScene')
     this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js')
     this.cameras.main.setBackgroundColor('#000000')
     game.input.mouse.capture = true
@@ -178,6 +213,7 @@ class TutScene extends Phaser.Scene {
 
   create (){
     var add = this.add
+    let start_btn
 
     WebFont.load({
       custom: {
@@ -190,12 +226,11 @@ class TutScene extends Phaser.Scene {
         add.text(100, 170, '- keep human(s) happy', { fontFamily: 'pxl', fontSize: 25 })
         add.text(100, 200, '- relax', { fontFamily: 'pxl', fontSize: 25 })
 
-        add.text(100, 400, 'click to activatie homie #384720a', { fontFamily: 'pxl', fontSize: 25 })
+        start_btn = add.text(100, 400, 'click here to activate homie #384720a', { fontFamily: 'pxl', fontSize: 25 }).setInteractive()
+        start_btn.on('pointerdown', function (pointer) {
+          game.scene.start('GameScene')
+        })
       }
-    })
-
-    this.input.on('pointerdown', function (pointer) {
-      game.scene.start('GameScene')
     })
   }
 
@@ -210,7 +245,7 @@ var config = {
   type: Phaser.AUTO,
   width: WIDTH,
   height: HEIGHT,
-  scene: TitleScene
+  scene: GameScene
 }
 
 var follower;
