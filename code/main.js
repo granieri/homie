@@ -1,7 +1,10 @@
+const WIDTH = 800
+const HEIGHT = 480
+
 var config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 480,
+  width: WIDTH,
+  height: HEIGHT,
   physics: {
     default: 'arcade',
     arcade: {
@@ -18,8 +21,6 @@ var config = {
 
 var game = new Phaser.Game(config)
 var score = 0
-const WIDTH = 800
-const HEIGHT = 480
 
 function preload () {
   this.load.image('bg', 'assets/bg.png')
@@ -82,6 +83,5 @@ function create (){
 
 function update (){
   //console.log('X:' + this.input.activePointer.x);
-
-  //sconsole.log('Y:' + this.input.activePointer.y);
+  //console.log('Y:' + this.input.activePointer.y);
 }
