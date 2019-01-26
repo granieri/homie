@@ -74,7 +74,9 @@ class GameScene extends Phaser.Scene {
 
 
     //guy
+    graphics = this.add.graphics();
     var line1 = new Phaser.Curves.Line([ 100, 100, 500, 200 ]);
+    path = this.add.path();
     follower = { t: 0, vec: new Phaser.Math.Vector2() };
     path.add(line1);
     this.tweens.add({
