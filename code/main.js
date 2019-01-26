@@ -1,3 +1,6 @@
+let music
+let blip
+
 class GameScene extends Phaser.Scene {
   constructor(config) {
     super(config)
@@ -18,14 +21,14 @@ class GameScene extends Phaser.Scene {
   }
 
   create (){
-
+    music.pause()
     let rect = 0
 
     let bg = this.add.sprite(WIDTH / 2, HEIGHT / 2, 'bg')
     bg.setDisplaySize(WIDTH, HEIGHT)
 
     this.input.on('pointerover', function (event, gameObjects) {
-      gameObjects[0].setTint(0xe273ab);
+      gameObjects[0].setTint(0xffb7f3);
     })
     this.input.on('pointerout', function (event, gameObjects) {
       gameObjects[0].clearTint();
@@ -78,6 +81,14 @@ class TitleScene extends Phaser.Scene {
     this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js')
     this.cameras.main.setBackgroundColor('#000000')
     game.input.mouse.capture = true
+
+    this.load.audio('theme', [
+        'assets/aardvark.mp3'
+    ])
+
+    this.load.audio('blip', [
+        'assets/blip.mp3'
+    ])
   }
 
   create (){
@@ -89,11 +100,17 @@ class TitleScene extends Phaser.Scene {
       active: function() {
         add.text(75, 170, 'homie', { color: '#ffffff', fontFamily: 'pxl', fontSize: 100 })
         add.text(75, 280, 'a game by max, erik, mark, yo, and wilfred', { color: '#ffffff', fontFamily: 'pxl', fontSize: 15 })
-        add.text(240, 400, 'click anywhere to start', { fontFamily: 'pxl', fontSize: 25 })
+        add.text(220, 400, 'click anywhere to start', { fontFamily: 'pxl', fontSize: 25 })
       }
     })
 
+    music = this.sound.add('theme')
+    music.play()
+
+    blip = this.sound.add('blip')
+
     this.input.on('pointerdown', function (pointer) {
+      blip.play()
       game.scene.start('TutScene')
     })
   }
