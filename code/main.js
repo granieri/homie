@@ -53,13 +53,24 @@ class GameScene extends Phaser.Scene {
         'assets/click.mp3'
     ])
 
+    this.load.audio('80ssong', [
+        'assets/80ssong.mp3'
+    ])
+
+    this.load.audio('theme', [
+        'assets/aardvark.mp3'
+    ])
+
     game.input.mouse.capture = true
   }
 
   create (){
-    let ambience = this.sound.add('ambience', {volume: 0.1, loop: true})
+    let ambience = this.sound.add('ambience', {volume: 0.18, loop: true})
     ambience.play()
     let click = this.sound.add('click')
+    let theme = this.sound.add('theme', {volume: 0.8, loop: true})
+    let popsong = this.sound.add('80ssong', {volume: 0.8, loop: true})
+
     let rect = 0
     let t = this.add.text(0, 0, '', { fontFamily: 'pxl', fontSize: 10 }).setOrigin(0,0)
 
@@ -68,9 +79,9 @@ class GameScene extends Phaser.Scene {
       lamp_on: true,
       oven_on: false,
       coffee_machine_on: false,
-      radio_on: false,
       tv_on: false,
-      console_on: 0
+      console_on: 0,
+      radio_on: 0
     }
 
     let listenForTV
@@ -146,8 +157,26 @@ class GameScene extends Phaser.Scene {
     //tv area
     let lazyboy = this.add.sprite(370,330,'chair')
     lazyboy.setScale(.32)
-    let radio = this.add.sprite(260,480,'radio').setOrigin(0,1).setInteractive()
+    let radio = this.add.sprite(280,455,'radio').setOrigin(0,1).setInteractive()
     radio.setScale(0.43)
+    radio.on('pointerdown', function(e){
+      click.play()
+      if(state.radio_on == 0){
+        state.radio_on = 1
+        if(theme.isPaused) theme.resume()
+        else theme.play()
+      }
+      else if(state.radio_on == 1){
+        state.radio_on = 2
+        theme.pause()
+        if(popsong.isPaused) popsong.resume()
+        else popsong.play()
+      }
+      else if(state.radio_on == 2){
+        state.radio_on = 0
+        popsong.pause()
+      }
+    })
     let tv_stand = this.add.sprite(470,430,'tv_stand').setOrigin(0,1)
     tv_stand.setScale(0.5)
     let tv = this.add.sprite(480,365,'tv').setOrigin(0,1).setInteractive()
@@ -333,7 +362,7 @@ class TitleScene extends Phaser.Scene {
     })
 
     let homie = this.add.sprite(610,195,'homie')
-    homie.setScale(.6)
+    homie.setScale(.32)
     homie.angle = 1
 
     music = this.sound.add('theme', {loop: true})
