@@ -13,8 +13,9 @@ class GameScene extends Phaser.Scene {
     this.load.image('guy', 'assets/guy.png')
     this.load.image('oven', 'assets/oven.png')
     this.load.spritesheet('tv', 'assets/tvs.png',
-      { frameWidth: 188, frameHeight: 307 }
+      { frameWidth: 146, frameHeight: 178 }
     )
+    this.load.image('tv_stand', 'assets/tv_stand.png')
     this.load.spritesheet('lamp', 'assets/lamps.png',
       { frameWidth: 169, frameHeight: 424 }
     )
@@ -30,6 +31,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('thermostat', 'assets/thermostat.png')
     this.load.image('darkness', 'assets/darkness.png')
     this.load.image('radio', 'assets/radio.png')
+    this.load.image('console', 'assets/console.png')
 
     this.load.image('walk1', 'assets/Walk_Cycle1.png')
     this.load.image('walk2', 'assets/Walk_Cycle2.png')
@@ -67,7 +69,8 @@ class GameScene extends Phaser.Scene {
       oven_on: false,
       coffee_machine_on: false,
       radio_on: false,
-      tv_on: false
+      tv_on: false,
+      console_on: 0
     }
 
     let bg = this.add.sprite(WIDTH / 2, HEIGHT / 2, 'bg')
@@ -120,7 +123,7 @@ class GameScene extends Phaser.Scene {
       }
     }, this)
     //kitchen
-    let fridge = this.add.sprite(60,420,'fridge').setOrigin(0,1).setInteractive()
+    let fridge = this.add.sprite(60,420,'fridge').setOrigin(0,1)
     fridge.setScale(.25)
     fridge.on('pointerdown', function(e){
       show_menu_box(this, e, [])
@@ -128,18 +131,24 @@ class GameScene extends Phaser.Scene {
     let oven = this.add.sprite(7,468,'oven').setOrigin(0,1).setInteractive()
     oven.setScale(.25)
     oven.on('pointerdown', function(e){
-      show_menu_box(this, e, [])
+      click.play()
+      // pass
     }, this)
     let counter = this.add.sprite(190,450,'counter').setOrigin(0,1)
     counter.setScale(0.4)
     let coffee_machine = this.add.sprite(195,320,'coffee').setOrigin(0,1).setInteractive()
     coffee_machine.setScale(.45)
+    coffee_machine.on('pointerdown', function(e){
+      click.play()
+    }, this)
     //tv area
     let lazyboy = this.add.sprite(370,330,'chair')
     lazyboy.setScale(.32)
     let radio = this.add.sprite(260,480,'radio').setOrigin(0,1).setInteractive()
     radio.setScale(0.43)
-    let tv = this.add.sprite(470,430,'tv').setOrigin(0,1).setInteractive()
+    let tv_stand = this.add.sprite(470,430,'tv_stand').setOrigin(0,1)
+    tv_stand.setScale(0.5)
+    let tv = this.add.sprite(480,365,'tv').setOrigin(0,1).setInteractive()
     let tvAudio = this.sound.add('tv_sound', { volume: 0.3, loop: true })
     tv.setScale(.5)
     tv.on('pointerdown', function(e){
@@ -150,18 +159,39 @@ class GameScene extends Phaser.Scene {
         tvAudio.pause()
       }
       else {
+        if(listenForTV){
+          // happiness
+        }
         state.tv_on = true
         if(tvAudio.isPaused) tvAudio.resume()
         else tvAudio.play()
         tv.setFrame(1)
       }
     }, this)
+    let game_console = this.add.sprite(505,395,'console').setInteractive()
+    game_console.on('pointerdown', function(e){
+      click.play()
+      if(state.tv_on && state.console_on == 2){
+        state.console_on = 0
+        tv.setFrame(1)
+        console.log('console off')
+      }
+      else if(state.tv_on && state.console_on == 0){
+        state.console_on = 2
+        tv.setFrame(2)
+        console.log('console on street game')
+      }
+    })
 
     //bedroom
-    let thermostat = this.add.sprite(590,232,'thermostat').setOrigin(0,1).setInteractive()
+    let thermostat = this.add.sprite(590,315,'thermostat').setOrigin(0,1).setInteractive()
     thermostat.setScale(.1)
-    let bed = this.add.sprite(600,459,'bed').setOrigin(0,1)
-    bed.setScale(.13)
+    thermostat.on('pointerdown', function(){
+      click.play()
+      // pass
+    }, this)
+    let bed = this.add.sprite(620,460,'bed').setOrigin(0,1)
+    bed.setScale(.5)
 
     //let guy = this.add.sprite(260,HEIGHT-20,'guy').setOrigin(0,1)
     //guy.setScale(.23)
