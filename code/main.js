@@ -80,38 +80,49 @@ class GameScene extends Phaser.Scene {
   }
 
   create (){
-    var happiness = 0;
-    var listenForCoffee = false;
-    var listenForTV = false;
+    var happiness = 0
+    var listenForCoffee = false
+    var listenForTV = false
+    var listenForRadio = false
 
     var firstEvent = this.time.delayedCall(3000, show_menu_box,
-      [this, {x: 330, y: 290}, [{text: '"I wonder whats on the TV today"'}]], this);
+      [this, {x: 330, y: 290}, [{text: '"I wonder whats on the TV today"'}]], this)
 
     var firstEventClose = this.time.delayedCall(9000, hide_menu_box,
-      [this], this);
+      [this], this)
 
     var firstEventActivateListener = this.time.delayedCall(3000, function(){
-      listenForTV = true;
-    },
-      [], this);
+      listenForTV = true
+    }, [], this)
 
     var secondEvent = this.time.delayedCall(20000, show_menu_box,
-      [this, {x: 330, y: 290}, [{text: '"Yo Homie, brew me some coffee."'}]], this);
+      [this, {x: 330, y: 290}, [{text: '"Yo Homie, brew me some coffee."'}]], this)
 
     var secondEventClose = this.time.delayedCall(26000, hide_menu_box,
       [this], this)
 
     var secondEventActivateListener = this.time.delayedCall(20000, function(){
-      listenForCoffee = true;
-    },
-      [], this)
+      listenForCoffee = true
+      listenForTV = false
+    }, [], this)
 
-    var endEvent = this.time.delayedCall(30000, function(){
+    var thirdEvent = this.time.delayedCall(30000, show_menu_box,
+      [this, {x: 330, y: 290}, [{text: '"Hey Homie, I want to listen to the radio"'}]], this)
+
+    var thirdEventClose = this.time.delayedCall(36000, hide_menu_box,
+      [this], this)
+
+    var thirdEventActivateListener = this.time.delayedCall(30000, function(){
+      listenForRadio = true
+      listenForCoffee = false
+    }, [], this)
+
+    var endEvent = this.time.delayedCall(50000, function(){
         show_menu_box(this, {x: 330, y: 200}, [{text: 'Your human just sent a message'}])
         this.input.enabled = false
       }, [], this)
-    var endEvent_score = this.time.delayedCall(35000, function(){
-        if(happiness > 4){
+    var endEvent_score = this.time.delayedCall(55000, function(){
+        if(happiness > 6){
           if(coffeeSpilled) this.add.sprite(400, 240, 'review_good_spill')
           else this.add.sprite(400, 240, 'review_good')
         }
@@ -271,6 +282,14 @@ class GameScene extends Phaser.Scene {
     radio.on('pointerdown', function(e){
       click.play()
       if(state.radio_on == 0){
+        // turn on
+        if(listenForRadio){
+          happiness+=3
+          listenForRadio = false
+        }
+        else if(state.tv_on){
+          happiness-=1
+        }
         state.radio_on = 1
         if(theme.isPaused) theme.resume()
         else theme.play()
@@ -294,6 +313,9 @@ class GameScene extends Phaser.Scene {
     tv.on('pointerdown', function(e){
       click.play()
       if(state.tv_on) {
+        if(listenForRadio){
+          happiness+=2
+        }
         state.tv_on = false
         tv.setFrame(0)
         tvAudio.pause()
