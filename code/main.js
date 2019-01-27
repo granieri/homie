@@ -4,20 +4,28 @@ let blip
 class GameScene extends Phaser.Scene {
   constructor(config) {
     super(config)
-    game.scene.remove('TutScene')
   }
 
   preload () {
+    this.scene.remove('TutScene')
     this.load.image('bg', 'assets/bg.png')
-    this.load.image('star', 'assets/star.png')
     this.load.image('guy', 'assets/guy.png')
     this.load.image('oven', 'assets/oven.png')
     this.load.image('tv', 'assets/tv.png')
-    this.load.image('lamp', 'assets/lamp.png')
+    this.load.spritesheet('lamp', 'assets/lamps.png',
+      { frameWidth: 169, frameHeight: 424 }
+    )
     this.load.image('coffee', 'assets/coffee.png')
     this.load.image('chair', 'assets/chair.png')
     this.load.image('art1', 'assets/art1.png')
+    this.load.image('art2', 'assets/art2.png')
+    this.load.image('art3', 'assets/art3.png')
     this.load.image('menu', 'assets/menu.png')
+    this.load.image('fridge', 'assets/fridge.png')
+    this.load.image('counter', 'assets/counter.png')
+    this.load.image('bed', 'assets/bed.png')
+    this.load.image('thermostat', 'assets/thermostat.png')
+    this.load.image('darkness', 'assets/darkness.png')
 
     this.load.image('walk1', 'assets/Walk_Cycle1.png')
     this.load.image('walk2', 'assets/Walk_Cycle2.png')
@@ -33,113 +41,174 @@ class GameScene extends Phaser.Scene {
   create (){
     //music.pause()
     let rect = 0
+    let t = this.add.text(0, 0, '', { fontFamily: 'pxl', fontSize: 10 }).setOrigin(0,0)
+
+    let box_up = false
 
     let bg = this.add.sprite(WIDTH / 2, HEIGHT / 2, 'bg')
     bg.setDisplaySize(WIDTH, HEIGHT)
 
     this.input.on('pointerover', function (event, gameObjects) {
-      gameObjects[0].setTint(0xffb7f3);
-    })
-    this.input.on('pointerout', function (event, gameObjects) {
-      gameObjects[0].clearTint();
+      gameObjects[0].setTint(0xffb7f3)
     })
 
-    this.input.on('pointerdown', function (e, gameObjects) {
-      if (this.menu_box) {
-        console.log(this.menu_box.getChildren())
-        this.menu_box.getChildren().forEach(child => {child.destroy()})
-        this.menu_box.getChildren().forEach(child => {child.destroy()})
-        this.menu_box.destroy()
+    this.input.on('pointerout', function (event, gameObjects) {
+      gameObjects[0].clearTint()
+    })
+
+    this.input.on('pointerdown', function (event, gameObjects) {
+      if(box_up){
+        hide_menu_box(this)
       }
-      var menu_box = this.add.group()
+    }, this)
+
+    let lamp_on = true
+
+    //bg
+    // let art1 = this.add.sprite(236,212,'art1').setOrigin(0,1).setInteractive()
+    // art1.setScale(.08)
+    // art1.angle = 2
+    let art2 = this.add.sprite(353,220,'art2').setOrigin(0,1).setInteractive()
+    art2.setScale(.6)
+    let art3 = this.add.sprite(220,212,'art3').setOrigin(0,1).setInteractive()
+    art3.setScale(.5)
+    art2.on('pointerdown', function(e){
+      show_menu_box(this, e, [{text: 'Reverse image search shows that this is worthless'}])
+    }, this)
+    art3.on('pointerdown', function(e){
+      show_menu_box(this, e, [{text: 'Reverse image search shows that this is a knock-off of a knock-off'}])
+    }, this)
+    let lamp = this.add.sprite(340,120,'lamp').setInteractive()
+    lamp.setFrame(1)
+    lamp.setScale(.4)
+    lamp.on('pointerdown', function(e){
+      if(lamp_on) {
+        darkness.alpha = 0.2
+        lamp_on = false
+        lamp.setFrame(0)
+      }
+      else {
+        darkness.alpha = 0
+        lamp_on = true
+        lamp.setFrame(1)
+      }
+    }, this)
+    //kitchen
+    let fridge = this.add.sprite(60,420,'fridge').setOrigin(0,1).setInteractive()
+    fridge.setScale(.25)
+    fridge.on('pointerdown', function(e){
+      show_menu_box(this, e, [])
+    }, this)
+    let oven = this.add.sprite(7,468,'oven').setOrigin(0,1).setInteractive()
+    oven.setScale(.25)
+    oven.on('pointerdown', function(e){
+      show_menu_box(this, e, [])
+    }, this)
+    let counter = this.add.sprite(190,450,'counter').setOrigin(0,1)
+    counter.setScale(0.4)
+    let coffee_machine = this.add.sprite(215-20,330+15,'coffee').setOrigin(0,1).setInteractive()
+    coffee_machine.setScale(.1)
+    //tv area
+    let lazyboy = this.add.sprite(387,330,'chair')
+    lazyboy.setScale(.32)
+    let side_table = this.add.sprite(320,430,rect).setOrigin(0,1)
+    let radio = this.add.sprite(328,379,rect).setOrigin(0,1).setInteractive()
+    let tv = this.add.sprite(515-50,377+60,'tv').setOrigin(0,1).setInteractive()
+    tv.setScale(.1)
+    //bedroom
+    let thermostat = this.add.sprite(620,232,'thermostat').setOrigin(0,1).setInteractive()
+    thermostat.setScale(.02)
+    let bed = this.add.sprite(600,459,'bed').setOrigin(0,1)
+    bed.setScale(.13)
+
+    let guy = this.add.sprite(260,HEIGHT-20,'guy').setOrigin(0,1)
+    guy.setScale(.23)
+
+    let darkness = this.add.sprite(WIDTH / 2, HEIGHT / 2, 'darkness')
+    darkness.alpha = 0
+
+  // //guy
+  // graphics = this.add.graphics();
+  // var line1 = new Phaser.Curves.Line([ 100, 100, 500, 200 ]);
+  //   path = this.add.path();
+  //   follower = { t: 0, vec: new Phaser.Math.Vector2() };
+  //   path.add(line1);
+  //   this.tweens.add({
+  //     targets: follower,
+  //     t: 1,
+  //     ease: 'Linear',
+  //     duration: 4000,
+  //     yoyo: true,
+  //     repeat: -1
+  //   })
+  //
+  //   this.anims.create({
+  //     key: 'snooze',
+  //     frames: [
+  //         { key: 'walk1' },
+  //         { key: 'walk2' },
+  //         { key: 'walk3' },
+  //         { key: 'walk4' },
+  //         { key: 'walk5' },
+  //         { key: 'walk6' },
+  //         { key: 'walk7', duration: 50 }
+  //     ],
+  //     frameRate: 8,
+  //     repeat: -1
+  //   })
+  //
+  //   guy = this.add.sprite(260, 360, 'walk1').play('snooze')
+  //   guy.setScale(.26)
+    function show_menu_box(ctx, e, options){
+      if (box_up) {
+        ctx.menu_box.getAll().forEach(child => {child.destroy()})
+        ctx.menu_box.getAll().forEach(child => {child.destroy()})
+        ctx.menu_box.destroy()
+        box_up = false
+      }
+      else {
+      var menu_box = ctx.add.container(e.x, e.y)
 
       //make the back of the message box
-      var box = this.add.sprite(e.x, e.y, 'menu').setOrigin(0,1)
+      var box = ctx.add.sprite(0,0, 'menu').setOrigin(0,1)
+
       box.alpha = 0.9
       //make a text field
-      var text1 = this.add.text(e.x+50, e.y-20, 'this is some text', { fontFamily: 'pxl', fontSize: 10 }).setOrigin(0,1)
+
+      if(e.y<105) {
+        if(e.x<700) box.setOrigin(0,0)
+        else box.setOrigin(1,0)
+      }
+      else{
+        if(e.x<700) box.setOrigin(0,1)
+        else box.setOrigin(1,1)
+      }
 
       box.width = 200
       box.height = 100
       menu_box.add(box)
-      menu_box.add(text1)
-
-      menu_box.x = this.input.activePointer.x
-      menu_box.y = this.input.activePointer.y
+      for(let i in options){
+        var text = ctx.add.text(20, (-80-10*i), options[i].text, { fontFamily: 'pxl', fontSize: 10, wordWrap: { width: 150, useAdvancedWrap: true } }).setOrigin(0,0)
+        menu_box.add(text)
+      }
 
       //make a state reference to the messsage box
-      this.menu_box = menu_box
-    }, this)
-
-    //bg
-    let art1 = this.add.sprite(236,212,'art1').setOrigin(0,1).setInteractive()
-    art1.setScale(.08)
-    art1.angle = 2
-    let art2 = this.add.sprite(353,220,rect).setOrigin(0,1).setInteractive()
-    //kitchen
-    let fridge = this.add.sprite(60,415,rect).setOrigin(0,1).setInteractive()
-    let oven = this.add.sprite(10-20,455+15,'oven').setOrigin(0,1).setInteractive()
-    oven.setScale(.12)
-    oven.angle = 5
-    let counter = this.add.sprite(195,450,rect).setOrigin(0,1).setInteractive()
-    let coffee_machine = this.add.sprite(215-20,330+15,'coffee').setOrigin(0,1).setInteractive()
-    coffee_machine.setScale(.1)
-    //tv area
-    let lazyboy = this.add.sprite(371-70,416+50,'chair').setOrigin(0,1).setInteractive()
-    lazyboy.setScale(.15)
-    lazyboy.flipX = true
-    lazyboy.angle = -5
-    let side_table = this.add.sprite(350,430,rect).setOrigin(0,1).setInteractive()
-    let radio = this.add.sprite(358,379,rect).setOrigin(0,1).setInteractive()
-    let tv = this.add.sprite(515-50,377+60,'tv').setOrigin(0,1).setInteractive()
-    tv.setScale(.1)
-    //bedroom
-    let thermostat = this.add.sprite(620,272,rect).setOrigin(0,1).setInteractive()
-    let bed = this.add.sprite(644,448,rect).setOrigin(0,1).setInteractive()
-    let table = this.add.sprite(608,456,rect).setOrigin(0,1).setInteractive()
-
-    let guy = this.add.sprite(260,HEIGHT-20,'guy').setOrigin(0,1)
-    guy.setScale(.2)
-
-
-    //guy
-    graphics = this.add.graphics();
-    var line1 = new Phaser.Curves.Line([ 100, 100, 500, 200 ]);
-    path = this.add.path();
-    follower = { t: 0, vec: new Phaser.Math.Vector2() };
-    path.add(line1);
-    this.tweens.add({
-      targets: follower,
-      t: 1,
-      ease: 'Linear',
-      duration: 4000,
-      yoyo: true,
-      repeat: -1
-    })
-
-    this.anims.create({
-      key: 'snooze',
-      frames: [
-          { key: 'walk1' },
-          { key: 'walk2' },
-          { key: 'walk3' },
-          { key: 'walk4' },
-          { key: 'walk5' },
-          { key: 'walk6' },
-          { key: 'walk7', duration: 50 }
-      ],
-      frameRate: 8,
-      repeat: -1
-    })
-
-    guy = this.add.sprite(260, 360, 'walk1').play('snooze')
-    guy.setScale(.26)
+      ctx.menu_box = menu_box
+      box_up = true
+      }
+    }
+    function hide_menu_box(ctx){
+      ctx.menu_box.getAll().forEach(child => {child.destroy()})
+      ctx.menu_box.getAll().forEach(child => {child.destroy()})
+      ctx.menu_box.destroy()
+      box_up = false
+    }
   }
 
   update (){
-    graphics.lineStyle(2, 0xffffff, 1);
+    //graphics.lineStyle(2, 0xffffff, 1);
 
-    path.draw(graphics);
+    //path.draw(graphics);
     //console.log('X:' + this.input.activePointer.x);
     //console.log('Y:' + this.input.activePointer.y);
   }
@@ -168,6 +237,7 @@ class TitleScene extends Phaser.Scene {
 
   create (){
     var add = this.add
+    let in_btn
     WebFont.load({
       custom: {
         families: [ 'pxl' ]
@@ -175,7 +245,13 @@ class TitleScene extends Phaser.Scene {
       active: function() {
         add.text(75, 170, 'homie', { color: '#ffffff', fontFamily: 'pxl', fontSize: 100 })
         add.text(75, 280, 'a game by max, erik, mark, yo, and wilfred', { color: '#ffffff', fontFamily: 'pxl', fontSize: 15 })
-        add.text(220, 400, 'click anywhere to start', { fontFamily: 'pxl', fontSize: 25 })
+        in_btn = add.text(220, 400, '[click here]', { fontFamily: 'pxl', fontSize: 25 }).setInteractive()
+
+        in_btn.on('pointerdown', function (pointer) {
+          blip.play()
+          game.scene.start('TutScene')
+          game.scene.remove('TitleScene')
+        })
       }
     })
 
@@ -186,12 +262,6 @@ class TitleScene extends Phaser.Scene {
     music.play()
 
     blip = this.sound.add('blip')
-
-    this.input.on('pointerdown', function (pointer) {
-      blip.play()
-      game.scene.stop('TitleScene')
-      game.scene.start('TutScene')
-    })
   }
 
   update (){
@@ -205,15 +275,20 @@ class TutScene extends Phaser.Scene {
   }
 
   preload () {
-    this.scene.remove('TitleScene')
+    //this.scene.remove('TitleScene')
     this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js')
     this.cameras.main.setBackgroundColor('#000000')
     game.input.mouse.capture = true
+
+    this.load.audio('blip', [
+        'assets/blip.mp3'
+    ])
   }
 
   create (){
     var add = this.add
     let start_btn
+    blip = this.sound.add('blip')
 
     WebFont.load({
       custom: {
@@ -228,6 +303,7 @@ class TutScene extends Phaser.Scene {
 
         start_btn = add.text(100, 400, 'click here to activate homie #384720a', { fontFamily: 'pxl', fontSize: 25 }).setInteractive()
         start_btn.on('pointerdown', function (pointer) {
+          blip.play()
           game.scene.start('GameScene')
         })
       }
