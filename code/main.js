@@ -4,6 +4,7 @@ let blip
 class GameScene extends Phaser.Scene {
   constructor(config) {
     super(config)
+    let score = 0
   }
 
   preload () {
@@ -11,7 +12,9 @@ class GameScene extends Phaser.Scene {
     this.load.image('bg', 'assets/bg.png')
     this.load.image('guy', 'assets/guy.png')
     this.load.image('oven', 'assets/oven.png')
-    this.load.image('tv', 'assets/tv.png')
+    this.load.spritesheet('tv', 'assets/tvs.png',
+      { frameWidth: 188, frameHeight: 307 }
+    )
     this.load.spritesheet('lamp', 'assets/lamps.png',
       { frameWidth: 169, frameHeight: 424 }
     )
@@ -26,6 +29,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('bed', 'assets/bed.png')
     this.load.image('thermostat', 'assets/thermostat.png')
     this.load.image('darkness', 'assets/darkness.png')
+    this.load.image('radio', 'assets/radio.png')
 
     this.load.image('walk1', 'assets/Walk_Cycle1.png')
     this.load.image('walk2', 'assets/Walk_Cycle2.png')
@@ -35,15 +39,31 @@ class GameScene extends Phaser.Scene {
     this.load.image('walk6', 'assets/Walk_Cycle6.png')
     this.load.image('walk7', 'assets/Walk_Cycle7.png')
 
+    this.load.audio('tv_sound', [
+        'assets/tv.mp3'
+    ])
+
+    this.load.audio('ambience', [
+        'assets/apartment.mp3'
+    ])
+
     game.input.mouse.capture = true
   }
 
   create (){
-    //music.pause()
+    let ambience = this.sound.add('ambience', {volume: 0.1, loop: true});
+    ambience.play()
     let rect = 0
     let t = this.add.text(0, 0, '', { fontFamily: 'pxl', fontSize: 10 }).setOrigin(0,0)
 
-    let box_up = false
+    let state = {
+      box_up: false,
+      lamp_on: true,
+      oven_on: false,
+      coffee_machine_on: false,
+      radio_on: false,
+      tv_on: false
+    }
 
     let bg = this.add.sprite(WIDTH / 2, HEIGHT / 2, 'bg')
     bg.setDisplaySize(WIDTH, HEIGHT)
@@ -57,12 +77,10 @@ class GameScene extends Phaser.Scene {
     })
 
     this.input.on('pointerdown', function (event, gameObjects) {
-      if(box_up){
+      if(state.box_up){
         hide_menu_box(this)
       }
     }, this)
-
-    let lamp_on = true
 
     //bg
     // let art1 = this.add.sprite(236,212,'art1').setOrigin(0,1).setInteractive()
@@ -82,14 +100,14 @@ class GameScene extends Phaser.Scene {
     lamp.setFrame(1)
     lamp.setScale(.4)
     lamp.on('pointerdown', function(e){
-      if(lamp_on) {
+      if(state.lamp_on) {
         darkness.alpha = 0.2
-        lamp_on = false
+        state.lamp_on = false
         lamp.setFrame(0)
       }
       else {
         darkness.alpha = 0
-        lamp_on = true
+        state.lamp_on = true
         lamp.setFrame(1)
       }
     }, this)
@@ -106,23 +124,38 @@ class GameScene extends Phaser.Scene {
     }, this)
     let counter = this.add.sprite(190,450,'counter').setOrigin(0,1)
     counter.setScale(0.4)
-    let coffee_machine = this.add.sprite(215-20,330+15,'coffee').setOrigin(0,1).setInteractive()
-    coffee_machine.setScale(.1)
+    let coffee_machine = this.add.sprite(195,320,'coffee').setOrigin(0,1).setInteractive()
+    coffee_machine.setScale(.45)
     //tv area
-    let lazyboy = this.add.sprite(387,330,'chair')
+    let lazyboy = this.add.sprite(370,330,'chair')
     lazyboy.setScale(.32)
-    let side_table = this.add.sprite(320,430,rect).setOrigin(0,1)
-    let radio = this.add.sprite(328,379,rect).setOrigin(0,1).setInteractive()
-    let tv = this.add.sprite(515-50,377+60,'tv').setOrigin(0,1).setInteractive()
-    tv.setScale(.1)
+    let radio = this.add.sprite(260,480,'radio').setOrigin(0,1).setInteractive()
+    radio.setScale(0.43)
+    let tv = this.add.sprite(470,430,'tv').setOrigin(0,1).setInteractive()
+    let tvAudio = this.sound.add('tv_sound', { volume: 0.3, loop: true })
+    tv.setScale(.5)
+    tv.on('pointerdown', function(e){
+      if(state.tv_on) {
+        state.tv_on = false
+        tv.setFrame(0)
+        tvAudio.pause()
+      }
+      else {
+        state.tv_on = true
+        if(tvAudio.isPaused) tvAudio.resume()
+        else tvAudio.play()
+        tv.setFrame(1)
+      }
+    }, this)
+
     //bedroom
-    let thermostat = this.add.sprite(620,232,'thermostat').setOrigin(0,1).setInteractive()
-    thermostat.setScale(.02)
+    let thermostat = this.add.sprite(590,232,'thermostat').setOrigin(0,1).setInteractive()
+    thermostat.setScale(.1)
     let bed = this.add.sprite(600,459,'bed').setOrigin(0,1)
     bed.setScale(.13)
 
-    let guy = this.add.sprite(260,HEIGHT-20,'guy').setOrigin(0,1)
-    guy.setScale(.23)
+    //let guy = this.add.sprite(260,HEIGHT-20,'guy').setOrigin(0,1)
+    //guy.setScale(.23)
 
     let darkness = this.add.sprite(WIDTH / 2, HEIGHT / 2, 'darkness')
     darkness.alpha = 0
@@ -160,11 +193,11 @@ class GameScene extends Phaser.Scene {
   //   guy = this.add.sprite(260, 360, 'walk1').play('snooze')
   //   guy.setScale(.26)
     function show_menu_box(ctx, e, options){
-      if (box_up) {
+      if (state.box_up) {
         ctx.menu_box.getAll().forEach(child => {child.destroy()})
         ctx.menu_box.getAll().forEach(child => {child.destroy()})
         ctx.menu_box.destroy()
-        box_up = false
+        state.box_up = false
       }
       else {
       var menu_box = ctx.add.container(e.x, e.y)
@@ -175,7 +208,7 @@ class GameScene extends Phaser.Scene {
       box.alpha = 0.9
       //make a text field
 
-      if(e.y<105) {
+      if(e.y<100) {
         if(e.x<700) box.setOrigin(0,0)
         else box.setOrigin(1,0)
       }
@@ -194,14 +227,14 @@ class GameScene extends Phaser.Scene {
 
       //make a state reference to the messsage box
       ctx.menu_box = menu_box
-      box_up = true
+      state.box_up = true
       }
     }
     function hide_menu_box(ctx){
       ctx.menu_box.getAll().forEach(child => {child.destroy()})
       ctx.menu_box.getAll().forEach(child => {child.destroy()})
       ctx.menu_box.destroy()
-      box_up = false
+      state.box_up = false
     }
   }
 
@@ -245,6 +278,7 @@ class TitleScene extends Phaser.Scene {
       active: function() {
         add.text(75, 170, 'homie', { color: '#ffffff', fontFamily: 'pxl', fontSize: 100 })
         add.text(75, 280, 'a game by max, erik, mark, yo, and wilfred', { color: '#ffffff', fontFamily: 'pxl', fontSize: 15 })
+        add.text(75, 310, 'with sounds from rob & adam', { color: '#ffffff', fontFamily: 'pxl', fontSize: 15 })
         in_btn = add.text(220, 400, '[click here]', { fontFamily: 'pxl', fontSize: 25 }).setInteractive()
 
         in_btn.on('pointerdown', function (pointer) {
@@ -304,6 +338,7 @@ class TutScene extends Phaser.Scene {
         start_btn = add.text(100, 400, 'click here to activate homie #384720a', { fontFamily: 'pxl', fontSize: 25 }).setInteractive()
         start_btn.on('pointerdown', function (pointer) {
           blip.play()
+          music.stop()
           game.scene.start('GameScene')
         })
       }
