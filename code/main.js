@@ -73,6 +73,8 @@ class GameScene extends Phaser.Scene {
       console_on: 0
     }
 
+    let listenForTV
+
     let bg = this.add.sprite(WIDTH / 2, HEIGHT / 2, 'bg')
     bg.setDisplaySize(WIDTH, HEIGHT)
 
@@ -295,6 +297,7 @@ class TitleScene extends Phaser.Scene {
     this.load.script('webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js')
     this.cameras.main.setBackgroundColor('#000000')
     game.input.mouse.capture = true
+    this.load.image('darkness', 'assets/darkness.png')
 
     this.load.audio('theme', [
         'assets/aardvark.mp3'
@@ -317,18 +320,20 @@ class TitleScene extends Phaser.Scene {
       active: function() {
         add.text(75, 170, 'homie', { color: '#ffffff', fontFamily: 'pxl', fontSize: 100 })
         add.text(75, 280, 'a game by max, erik, mark, yo, and wilfred', { color: '#ffffff', fontFamily: 'pxl', fontSize: 15 })
-        add.text(75, 310, 'with sounds from rob & adam', { color: '#ffffff', fontFamily: 'pxl', fontSize: 15 })
+        add.text(75, 310, 'with sounds from rob', { color: '#ffffff', fontFamily: 'pxl', fontSize: 15 })
         in_btn = add.text(220, 400, '[click here]', { fontFamily: 'pxl', fontSize: 25 }).setInteractive()
 
         in_btn.on('pointerdown', function (pointer) {
           blip.play()
           game.scene.start('TutScene')
           game.scene.remove('TitleScene')
+          add.sprite(800 / 2, 480 / 2, 'darkness')
         })
       }
     })
 
     let homie = this.add.sprite(610,195,'homie')
+    homie.setScale(.6)
     homie.angle = 1
 
     music = this.sound.add('theme', {loop: true})
@@ -395,7 +400,7 @@ var config = {
   type: Phaser.AUTO,
   width: WIDTH,
   height: HEIGHT,
-  scene: GameScene
+  scene: TitleScene
 }
 
 var follower;
