@@ -20,6 +20,7 @@ class GameScene extends Phaser.Scene {
     )
     this.load.image('coffee', 'assets/coffee.png')
     this.load.image('chair', 'assets/chair.png')
+    this.load.image('sittingInChair', 'assets/sitting_in_chair.png')
     this.load.image('art1', 'assets/art1.png')
     this.load.image('art2', 'assets/art2.png')
     this.load.image('art3', 'assets/art3.png')
@@ -39,6 +40,15 @@ class GameScene extends Phaser.Scene {
     this.load.image('walk6', 'assets/Walk_Cycle6.png')
     this.load.image('walk7', 'assets/Walk_Cycle7.png')
 
+    this.load.image('coffeeEmpty', 'assets/Coffee_Maker_Empty_Cup.png')
+    this.load.image('coffeeFilling', 'assets/Coffee_Maker_Filling_Full_Cup.png')
+    this.load.image('coffeeFull', 'assets/Coffee_Maker_Full_Cup.png')
+    this.load.image('coffeeOverFlow', 'assets/Coffee_Maker_Overflowing_Full_Cup.png')
+
+    this.load.audio('coffeeSound', [
+      'assets/coffee_machine.mp3'
+    ])
+
     this.load.audio('tv_sound', [
         'assets/tv.mp3'
     ])
@@ -55,6 +65,31 @@ class GameScene extends Phaser.Scene {
   }
 
   create (){
+    var happiness = 0;
+    var listenForCoffee = false;
+    var listenForTV = false;
+
+    var firstEvent = this.time.delayedCall(3000, show_menu_box, 
+      [this, {x: 330, y: 290}, [{text: '"I wonder whats on the TV today"'}]], this);
+  
+      var firstEventClose = this.time.delayedCall(6000, hide_menu_box, 
+        [this], this);
+  
+      var firstEventActivateListener = this.time.delayedCall(3000, function(){
+        listenForTV = true;
+      }, 
+        [], this);
+
+      var secondEvent = this.time.delayedCall(20000, show_menu_box, 
+        [this, {x: 330, y: 290}, [{text: '"Yo Homie, brew me some coffee."'}]], this);
+    
+        var secondEventClose = this.time.delayedCall(23000, hide_menu_box, 
+          [this], this);
+    
+        var secondEventActivateListener = this.time.delayedCall(20000, function(){
+          listenForCoffee = true;
+        }, 
+          [], this);
     let ambience = this.sound.add('ambience', {volume: 0.1, loop: true})
     ambience.play()
     let click = this.sound.add('click')
@@ -132,10 +167,63 @@ class GameScene extends Phaser.Scene {
     }, this)
     let counter = this.add.sprite(190,450,'counter').setOrigin(0,1)
     counter.setScale(0.4)
-    let coffee_machine = this.add.sprite(195,320,'coffee').setOrigin(0,1).setInteractive()
+    var coffeeFilled = false;
+    let coffee_machine = this.add.sprite(181,338,'coffeeEmpty').setOrigin(0,1).setInteractive()
     coffee_machine.setScale(.45)
+         this.anims.create({
+          key: 'coffee',
+          frames: [
+              { key: 'coffeeEmpty' },
+              { key: 'coffeeFilling', duration: 1500 },
+              { key: 'coffeeFull' },
+          ],
+          frameRate: 8,
+          repeat: 0
+        })
+        this.anims.create({
+          key: 'overFlow',
+          frames: [
+              { key: 'coffeeFull' },
+              { key: 'coffeeOverFlow', duration: 1500 },
+              { key: 'coffeeFull' },
+          ],
+          frameRate: 8,
+          repeat: 0
+        })
+        var coffeeFilled = false;
+        var coffeeSpilled = false;
+        let coffeeAudio = this.sound.add('coffeeSound', { volume: 0.3})
+     coffee_machine.on('pointerdown', function(e){
+       
+       if(coffeeFilled == false){
+        coffeeAudio.play()
+       coffeeFilled = true;
+       coffee_machine.play('coffee')
+       coffee_machine.x = 181
+       coffee_machine.y = 338
+       if(listenForCoffee == true){
+            happiness += 5
+            show_menu_box(this, {x: 330, y: 290}, [{text: '"Thanks Homie! I love the smell of coffee."'}])
+            var coffeeThanksClose = this.time.delayedCall(2000, hide_menu_box, 
+              [this], this);
+          }
+       }
+       else
+       {
+        coffeeAudio.play()
+         console.log('OverFlow')
+        coffee_machine.play('overFlow')
+        show_menu_box(this, {x: 330, y: 290}, [{text: '"WTF Homie! You made a mess!"'}])
+        var coffeeInsultClose = this.time.delayedCall(2000, hide_menu_box, 
+         [this], this);
+        coffeeSpilled = true;
+        happiness -= 10
+       }  
+     }, this)
+
+
     //tv area
-    let lazyboy = this.add.sprite(370,330,'chair')
+    let lazyboy = this.add.sprite(378,310,'sittingInChair')
     lazyboy.setScale(.32)
     let radio = this.add.sprite(260,480,'radio').setOrigin(0,1).setInteractive()
     radio.setScale(0.43)
