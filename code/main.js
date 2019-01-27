@@ -47,12 +47,17 @@ class GameScene extends Phaser.Scene {
         'assets/apartment.mp3'
     ])
 
+    this.load.audio('click', [
+        'assets/click.mp3'
+    ])
+
     game.input.mouse.capture = true
   }
 
   create (){
-    let ambience = this.sound.add('ambience', {volume: 0.1, loop: true});
+    let ambience = this.sound.add('ambience', {volume: 0.1, loop: true})
     ambience.play()
+    let click = this.sound.add('click')
     let rect = 0
     let t = this.add.text(0, 0, '', { fontFamily: 'pxl', fontSize: 10 }).setOrigin(0,0)
 
@@ -91,15 +96,18 @@ class GameScene extends Phaser.Scene {
     let art3 = this.add.sprite(220,212,'art3').setOrigin(0,1).setInteractive()
     art3.setScale(.5)
     art2.on('pointerdown', function(e){
+      click.play()
       show_menu_box(this, e, [{text: 'Reverse image search shows that this is worthless'}])
     }, this)
     art3.on('pointerdown', function(e){
+      click.play()
       show_menu_box(this, e, [{text: 'Reverse image search shows that this is a knock-off of a knock-off'}])
     }, this)
     let lamp = this.add.sprite(340,120,'lamp').setInteractive()
     lamp.setFrame(1)
     lamp.setScale(.4)
     lamp.on('pointerdown', function(e){
+      click.play()
       if(state.lamp_on) {
         darkness.alpha = 0.2
         state.lamp_on = false
@@ -135,6 +143,7 @@ class GameScene extends Phaser.Scene {
     let tvAudio = this.sound.add('tv_sound', { volume: 0.3, loop: true })
     tv.setScale(.5)
     tv.on('pointerdown', function(e){
+      click.play()
       if(state.tv_on) {
         state.tv_on = false
         tv.setFrame(0)
