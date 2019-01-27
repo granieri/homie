@@ -4,7 +4,6 @@ let blip
 class GameScene extends Phaser.Scene {
   constructor(config) {
     super(config)
-    let score = 0
   }
 
   preload () {
@@ -34,6 +33,11 @@ class GameScene extends Phaser.Scene {
     this.load.image('radio', 'assets/radio.png')
     this.load.image('console', 'assets/console.png')
 
+    this.load.image('review_good', 'assets/good_review_no_spill.png')
+    this.load.image('review_good_spill', 'assets/good_review_no_spill.png')
+    this.load.image('review_bad', 'assets/bad_review_no_spill.png')
+    this.load.image('review_bad_spill', 'assets/bad_review_spill.png')
+
     this.load.image('walk1', 'assets/Walk_Cycle1.png')
     this.load.image('walk2', 'assets/Walk_Cycle2.png')
     this.load.image('walk3', 'assets/Walk_Cycle3.png')
@@ -42,7 +46,7 @@ class GameScene extends Phaser.Scene {
     this.load.image('walk6', 'assets/Walk_Cycle6.png')
     this.load.image('walk7', 'assets/Walk_Cycle7.png')
 
-    
+
     this.load.image('coffeeEmpty', 'assets/Coffee_Maker_Empty_Cup.png')
     this.load.image('coffeeFilling', 'assets/Coffee_Maker_Filling_Full_Cup.png')
     this.load.image('coffeeFull', 'assets/Coffee_Maker_Full_Cup.png')
@@ -80,28 +84,46 @@ class GameScene extends Phaser.Scene {
     var listenForCoffee = false;
     var listenForTV = false;
 
-    var firstEvent = this.time.delayedCall(3000, show_menu_box, 
+    var firstEvent = this.time.delayedCall(3000, show_menu_box,
       [this, {x: 330, y: 290}, [{text: '"I wonder whats on the TV today"'}]], this);
-  
-      var firstEventClose = this.time.delayedCall(6000, hide_menu_box, 
-        [this], this);
-  
-      var firstEventActivateListener = this.time.delayedCall(3000, function(){
-        listenForTV = true;
-      }, 
-        [], this);
 
-      var secondEvent = this.time.delayedCall(20000, show_menu_box, 
-        [this, {x: 330, y: 290}, [{text: '"Yo Homie, brew me some coffee."'}]], this);
-    
-        var secondEventClose = this.time.delayedCall(23000, hide_menu_box, 
-          [this], this);
-    
-        var secondEventActivateListener = this.time.delayedCall(20000, function(){
-          listenForCoffee = true;
-        }, 
-          [], this);
+    var firstEventClose = this.time.delayedCall(9000, hide_menu_box,
+      [this], this);
 
+    var firstEventActivateListener = this.time.delayedCall(3000, function(){
+      listenForTV = true;
+    },
+      [], this);
+
+    var secondEvent = this.time.delayedCall(20000, show_menu_box,
+      [this, {x: 330, y: 290}, [{text: '"Yo Homie, brew me some coffee."'}]], this);
+
+    var secondEventClose = this.time.delayedCall(26000, hide_menu_box,
+      [this], this)
+
+    var secondEventActivateListener = this.time.delayedCall(20000, function(){
+      listenForCoffee = true;
+    },
+      [], this)
+
+    var endEvent = this.time.delayedCall(30000, function(){
+        show_menu_box(this, {x: 330, y: 200}, [{text: 'Your human just sent a message'}])
+        this.input.enabled = false
+      }, [], this)
+    var endEvent_score = this.time.delayedCall(35000, function(){
+        if(happiness > 4){
+          if(coffeeSpilled) this.add.sprite(400, 240, 'review_good_spill')
+          else this.add.sprite(400, 240, 'review_good')
+        }
+        else {
+          if(coffeeSpilled) this.add.sprite(400, 240, 'review_bad_spill')
+          else this.add.sprite(400, 240, 'review_bad')
+        }
+        let score_text = "You scored " + happiness
+        this.add.text(350, 400, score_text, { fontFamily: 'pxl', fontSize: 18, color: '#000000' })
+      },
+
+    [], this)
 
     let ambience = this.sound.add('ambience', {volume: 0.18, loop: true})
     ambience.play()
@@ -163,6 +185,7 @@ class GameScene extends Phaser.Scene {
     lamp.on('pointerdown', function(e){
       click.play()
       if(state.lamp_on) {
+        this.happiness -= 1
         darkness.alpha = 0.2
         state.lamp_on = false
         lamp.setFrame(0)
@@ -214,7 +237,7 @@ class GameScene extends Phaser.Scene {
         var coffeeSpilled = false;
         let coffeeAudio = this.sound.add('coffeeSound', { volume: 0.3})
      coffee_machine.on('pointerdown', function(e){
-       
+
        if(coffeeFilled == false){
         coffeeAudio.play()
        coffeeFilled = true;
@@ -224,7 +247,7 @@ class GameScene extends Phaser.Scene {
        if(listenForCoffee == true){
             happiness += 5
             show_menu_box(this, {x: 330, y: 290}, [{text: '"Thanks Homie! I love the smell of coffee."'}])
-            var coffeeThanksClose = this.time.delayedCall(2000, hide_menu_box, 
+            var coffeeThanksClose = this.time.delayedCall(5000, hide_menu_box,
               [this], this);
           }
        }
@@ -234,11 +257,11 @@ class GameScene extends Phaser.Scene {
          console.log('OverFlow')
         coffee_machine.play('overFlow')
         show_menu_box(this, {x: 330, y: 290}, [{text: '"WTF Homie! You made a mess!"'}])
-        var coffeeInsultClose = this.time.delayedCall(2000, hide_menu_box, 
+        var coffeeInsultClose = this.time.delayedCall(5000, hide_menu_box,
          [this], this);
         coffeeSpilled = true;
-        happiness -= 10
-       }  
+        happiness -= 6
+       }
      }, this)
     //tv area
     let lazyboy = this.add.sprite(378,310,'sittingInChair')
@@ -277,7 +300,9 @@ class GameScene extends Phaser.Scene {
       }
       else {
         if(listenForTV){
-          // happiness
+          happiness += 5
+          listenForTV = false
+          console.log(happiness + ' tv')
         }
         state.tv_on = true
         if(tvAudio.isPaused) tvAudio.resume()
@@ -523,7 +548,6 @@ var path;
 var graphics;
 
 var game = new Phaser.Game(config)
-var score = 0
 
 game.scene.add('TitleScene', TitleScene)
 game.scene.add('TutScene', TutScene)
