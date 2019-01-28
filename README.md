@@ -4,15 +4,16 @@ Homie is a game we developed for [Global Game Jam 2019](https://globalgamejam.or
 You can play it at http://anterrobang.org/homie (shout out to ant for hosting)
 
 ## build
-```bash
-#install dependencies
-npm install
+Homie is an HTML5 game built with the Phaser framework. Phaser is loaded via CDN, so all you need to run it locally is a web server. You can use whatever tool you want to do that, but we used Node. 
 
-#serve with hot reload:
+To develop with Node:
+```bash
+#using browser-sync:
 npm install -g browser-sync
 browser-sync start --server --files "code/*,assets/*,index.html"
 
-#run app
+#using express
+npm install
 node app.js
 ```
 
